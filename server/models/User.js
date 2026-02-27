@@ -10,13 +10,10 @@ const userSchema = new mongoose.Schema({
   playlists:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'Playlist' }],
 }, { timestamps: true });
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
+userSchema.pre('save', async function () {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 12);
   }
-  const salt = await bcrypt.genSalt(12);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 userSchema.methods.matchPassword = async function (entered) {

@@ -33,10 +33,40 @@ exports.searchSongs = async (req, res) => {
 };
 
 exports.uploadSong = async (req, res) => {
-  const { title, artist, album, genre, movie, duration } = req.body;
-  if (!req.files || !req.files.audio) {
-    return res.status(400).json({ message: 'Audio file is required' });
+  console.log('BODY:', req.body);
+  console.log('FILES:', req.files);
+
+  const title    = req.body.title    || req.body.Title;
+  const artist   = req.body.artist   || req.body.Artist;
+  const album    = req.body.album    || req.body.Album    || '';
+  const genre    = req.body.genre    || req.body.Genre    || 'Pop';
+  const movie    = req.body.movie    || req.body.Movie    || '';
+  const duration = req.body.duration || req.body.Duration || 0;
+
+  if (!title || !artist) {
+    return res.status(400).json({ message: `Missing fields - title: ${title}, artist: ${artist}`, body: req.body });
   }
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files uploaded', files: req.files });
+  }
+
+  const audioFile = req.files.find(f =>
+    f.mimetype.startsWith('audio') ||
+    f.originalname.match(/\.(mp3|wav|ogg)$/i) ||
+    f.fieldname === 'audio'
+  );
+
+  const coverFile = req.files.find(f =>
+    f.mimetype.startsWith('image') ||
+    f.originalname.match(/\.(jpg|jpeg|png|webp)$/i) ||
+    f.fieldname === 'cover'
+  );
+
+  if (!audioFile) {
+    return res.status(400).json({ message: 'Audio file is required', files: req.files.map(f => f.originalname) });
+  }
+
   const song = await Song.create({
     title,
     artist,
@@ -44,11 +74,12 @@ exports.uploadSong = async (req, res) => {
     genre,
     movie,
     duration: parseFloat(duration) || 0,
-    audioUrl: req.files.audio[0].path,
-    coverImage: req.files.cover ? req.files.cover[0].path : '',
-    publicId: req.files.audio[0].filename,
+    audioUrl: audioFile.path,
+    coverImage: coverFile ? coverFile.path : '',
+    publicId: audioFile.filename,
     uploadedBy: req.user._id,
   });
+
   res.status(201).json(song);
 };
 

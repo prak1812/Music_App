@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,7 +11,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: (req, file) => {
-    if (file.fieldname === 'audio') {
+    if (file.mimetype.startsWith('audio') || file.originalname.match(/\.(mp3|wav|ogg)$/i)) {
       return {
         folder: 'music-app/audio',
         resource_type: 'video',
@@ -26,9 +26,6 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({ storage }).fields([
-  { name: 'audio', maxCount: 1 },
-  { name: 'cover', maxCount: 1 },
-]);
+const upload = multer({ storage }).any();
 
 module.exports = { cloudinary, upload };
