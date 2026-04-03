@@ -47,14 +47,14 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.pending,    (state)         => { state.loading = true;  state.error = null; })
-      .addCase(login.fulfilled,  (state, action) => { state.loading = false; state.user = action.payload; })
-      .addCase(login.rejected,   (state, action) => { state.loading = false; state.error = action.payload; })
+      .addCase(login.pending,       (state)         => { state.loading = true;  state.error = null; })
+      .addCase(login.fulfilled,     (state, action) => { state.loading = false; state.user  = action.payload; })
+      .addCase(login.rejected,      (state, action) => { state.loading = false; state.error = action.payload; })
       .addCase(register.pending,    (state)         => { state.loading = true;  state.error = null; })
-      .addCase(register.fulfilled,  (state, action) => { state.loading = false; state.user = action.payload; })
+      .addCase(register.fulfilled,  (state, action) => { state.loading = false; state.user  = action.payload; })
       .addCase(register.rejected,   (state, action) => { state.loading = false; state.error = action.payload; })
-      .addCase(fetchMe.fulfilled, (state, action) => { state.user = action.payload;  state.initialized = true; })
-      .addCase(fetchMe.rejected,  (state)         => { state.initialized = true; });
+      .addCase(fetchMe.fulfilled,   (state, action) => { state.user = action.payload; state.initialized = true; })
+      .addCase(fetchMe.rejected,    (state)         => { state.initialized = true; });
   },
 });
 

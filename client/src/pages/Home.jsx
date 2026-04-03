@@ -17,20 +17,34 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    getSongs({ genre: genre || undefined, page: 1, limit: 20 }).then((res) => {
-      setSongs(res.data.songs);
-      setHasMore(1 < res.data.pages);
-      setPage(1);
-    }).finally(() => setLoading(false));
+    getSongs({ genre: genre || undefined, page: 1, limit: 20 })
+      .then((res) => {
+        // Guard against unexpected API response shapes
+        const fetchedSongs = Array.isArray(res.data?.songs) ? res.data.songs
+                           : Array.isArray(res.data)        ? res.data
+                           : [];
+        const totalPages = res.data?.pages ?? 1;
+        setSongs(fetchedSongs);
+        setHasMore(1 < totalPages);
+        setPage(1);
+      })
+      .catch(() => setSongs([]))
+      .finally(() => setLoading(false));
   }, [genre]);
 
   const loadMore = () => {
     const next = page + 1;
-    getSongs({ genre: genre || undefined, page: next, limit: 20 }).then((res) => {
-      setSongs((prev) => [...prev, ...res.data.songs]);
-      setHasMore(next < res.data.pages);
-      setPage(next);
-    });
+    getSongs({ genre: genre || undefined, page: next, limit: 20 })
+      .then((res) => {
+        const fetchedSongs = Array.isArray(res.data?.songs) ? res.data.songs
+                           : Array.isArray(res.data)        ? res.data
+                           : [];
+        const totalPages = res.data?.pages ?? 1;
+        setSongs((prev) => [...prev, ...fetchedSongs]);
+        setHasMore(next < totalPages);
+        setPage(next);
+      })
+      .catch(() => {});
   };
 
   const greet = () => {

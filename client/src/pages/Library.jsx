@@ -28,6 +28,9 @@ export default function Library() {
     toast.success('Playlist deleted');
   };
 
+  // Safeguard: ensure playlists is always an array
+  const safePlaylists = Array.isArray(playlists) ? playlists : [];
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
@@ -69,7 +72,7 @@ export default function Library() {
         </form>
       )}
 
-      {playlists.length === 0 ? (
+      {safePlaylists.length === 0 ? (
         <div className="text-center py-20">
           <FaMusic size={48} className="text-[#535353] mx-auto mb-4" />
           <p className="text-white text-xl font-bold mb-2">Create your first playlist</p>
@@ -79,13 +82,13 @@ export default function Library() {
         </div>
       ) : view === 'grid' ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {playlists.map((pl) => (
+          {safePlaylists.map((pl) => (
             <Link key={pl._id} to={`/playlist/${pl._id}`} className="bg-[#181818] hover:bg-[#282828] rounded-lg p-4 group transition-colors relative">
               <div className="w-full aspect-square bg-gradient-to-br from-[#450af5] to-[#c4efd9] rounded-md flex items-center justify-center mb-4 shadow-lg">
                 <FaMusic size={36} className="text-white opacity-60" />
               </div>
               <p className="font-bold text-sm text-white truncate">{pl.name}</p>
-              <p className="text-xs text-[#b3b3b3] mt-1">{pl.songs.length} songs</p>
+              <p className="text-xs text-[#b3b3b3] mt-1">{pl.songs?.length ?? 0} songs</p>
               <button onClick={(e) => handleDelete(e, pl._id)} className="absolute top-3 right-3 text-[#b3b3b3] hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
                 <FaTrash size={13} />
               </button>
@@ -94,14 +97,14 @@ export default function Library() {
         </div>
       ) : (
         <div className="flex flex-col gap-1">
-          {playlists.map((pl) => (
+          {safePlaylists.map((pl) => (
             <Link key={pl._id} to={`/playlist/${pl._id}`} className="flex items-center gap-4 px-3 py-3 rounded-md hover:bg-[#282828] group transition-colors">
               <div className="w-12 h-12 bg-gradient-to-br from-[#450af5] to-[#c4efd9] rounded-md flex items-center justify-center shrink-0">
                 <FaMusic size={18} className="text-white opacity-60" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-white truncate">{pl.name}</p>
-                <p className="text-xs text-[#b3b3b3]">Playlist · {pl.songs.length} songs</p>
+                <p className="text-xs text-[#b3b3b3]">Playlist · {pl.songs?.length ?? 0} songs</p>
               </div>
               <button onClick={(e) => handleDelete(e, pl._id)} className="text-[#b3b3b3] hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
                 <FaTrash size={13} />

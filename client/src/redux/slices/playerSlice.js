@@ -16,8 +16,8 @@ const playerSlice = createSlice({
   reducers: {
     setCurrentSong(state, action) {
       state.currentSong  = action.payload.song;
-      state.queue        = action.payload.queue || [action.payload.song];
-      state.currentIndex = action.payload.index || 0;
+      state.queue        = Array.isArray(action.payload.queue) ? action.payload.queue : [action.payload.song];
+      state.currentIndex = action.payload.index ?? 0;
       state.isPlaying    = true;
       state.progress     = 0;
     },
@@ -42,6 +42,7 @@ const playerSlice = createSlice({
       state.duration = action.payload;
     },
     playNext(state) {
+      if (!state.queue?.length) return;
       if (state.isShuffle) {
         state.currentIndex = Math.floor(Math.random() * state.queue.length);
       } else if (state.currentIndex < state.queue.length - 1) {
@@ -52,13 +53,13 @@ const playerSlice = createSlice({
         state.isPlaying = false;
         return;
       }
-      state.currentSong = state.queue[state.currentIndex];
+      state.currentSong = state.queue[state.currentIndex] ?? null;
       state.progress    = 0;
     },
     playPrev(state) {
       if (state.currentIndex > 0) {
         state.currentIndex -= 1;
-        state.currentSong   = state.queue[state.currentIndex];
+        state.currentSong   = state.queue[state.currentIndex] ?? null;
         state.progress      = 0;
       }
     },

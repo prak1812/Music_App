@@ -13,7 +13,16 @@ export default function LikedSongs() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLikedSongs().then((res) => setSongs(res.data)).finally(() => setLoading(false));
+    getLikedSongs()
+      .then((res) => {
+        // Handle both shapes: array directly OR { songs: [] }
+        const data = res.data;
+        if (Array.isArray(data))        setSongs(data);
+        else if (Array.isArray(data?.songs)) setSongs(data.songs);
+        else setSongs([]);
+      })
+      .catch(() => setSongs([]))
+      .finally(() => setLoading(false));
   }, []);
 
   const isActive = songs.some((s) => s._id === currentSong?._id) && isPlaying;
@@ -39,10 +48,16 @@ export default function LikedSongs() {
         {songs.length > 0 && (
           <div className="mb-6">
             <button
-              onClick={isActive ? () => dispatch(togglePlay()) : () => dispatch(setCurrentSong({ song: songs[0], queue: songs, index: 0 }))}
+              onClick={isActive
+                ? () => dispatch(togglePlay())
+                : () => dispatch(setCurrentSong({ song: songs[0], queue: songs, index: 0 }))
+              }
               className="w-14 h-14 bg-[#1DB954] rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
             >
-              {isActive ? <FaPause size={20} className="text-black" /> : <FaPlay size={20} className="text-black ml-1" />}
+              {isActive
+                ? <FaPause size={20} className="text-black" />
+                : <FaPlay  size={20} className="text-black ml-1" />
+              }
             </button>
           </div>
         )}
