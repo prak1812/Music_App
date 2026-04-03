@@ -14,7 +14,7 @@ const app = express();
 /* ================= CORS ================= */
 app.use(cors({
   origin: [
-    'https://music-app-1-ldvu.onrender.com/login',
+    'https://music-app-1-ldvu.onrender.com',
     process.env.CLIENT_URL,
   ].filter(Boolean),
   credentials: true,
