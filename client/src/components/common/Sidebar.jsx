@@ -40,7 +40,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {user && playlists.length > 0 && (
+      {user && playlists?.length > 0 && ( 
         <div className="flex-1 overflow-y-auto px-6 py-4 border-t border-[#282828] mt-2">
           <p className="text-xs font-bold text-[#b3b3b3] uppercase tracking-widest mb-3">Playlists</p>
           <div className="flex flex-col gap-1">
