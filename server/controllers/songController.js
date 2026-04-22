@@ -95,17 +95,25 @@ exports.toggleLike = async (req, res) => {
     const song = await Song.findById(req.params.id);
     if (!song) return res.status(404).json({ message: 'Song not found' });
 
+    const User   = require('../models/User');
+    const user   = await User.findById(req.user._id);
     const userId = req.user._id.toString();
     const likes  = song.likes.map((l) => l.toString());
     const liked  = likes.includes(userId);
 
     if (liked) {
-      song.likes = song.likes.filter((l) => l.toString() !== userId);
+      // Unlike — remove from both song.likes and user.likedSongs
+      song.likes       = song.likes.filter((l) => l.toString() !== userId);
+      user.likedSongs  = user.likedSongs.filter((s) => s.toString() !== song._id.toString());
     } else {
+      // Like — add to both song.likes and user.likedSongs
       song.likes.push(req.user._id);
+      user.likedSongs.push(song._id);
     }
 
     await song.save();
+    await user.save();
+
     res.json({ liked: !liked, likeCount: song.likes.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
