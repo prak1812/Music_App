@@ -63,7 +63,7 @@ export default function LikedSongs() {
         )}
 
         {songs.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20"> 
             <p className="text-white text-xl font-bold mb-2">Songs you like will appear here</p>
             <p className="text-[#b3b3b3] text-sm">Tap the heart icon on any song.</p>
           </div>

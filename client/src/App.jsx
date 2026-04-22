@@ -13,6 +13,7 @@ import Login         from './pages/Login';
 import Register      from './pages/Register';
 import LikedSongs    from './pages/LikedSongs';
 import Profile       from './pages/Profile';
+import Upload from './pages/Upload';
 
 function ProtectedRoute({ children }) {
   const { user, initialized } = useSelector((s) => s.auth);
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/login"      element={<Login />} />
             <Route path="/register"   element={<Register />} />
+            <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>

@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaHome, FaSearch, FaBook, FaHeart, FaUser, FaSignOutAlt, FaMusic } from 'react-icons/fa';
+import { FaHome, FaSearch, FaBook, FaHeart, FaUser, FaSignOutAlt, FaMusic, FaUpload } from 'react-icons/fa';
 import { logout } from '../../redux/slices/authSlice';
 import { useEffect } from 'react';
 import { fetchPlaylists } from '../../redux/slices/playlistSlice';
+
 
 export default function Sidebar() {
   const dispatch = useDispatch();
@@ -37,6 +38,7 @@ export default function Sidebar() {
           <NavLink to="/search"  className={link}><FaSearch size={18} /> Search</NavLink>
           <NavLink to="/library" className={link}><FaBook size={18} /> Your Library</NavLink>
           {user && <NavLink to="/liked" className={link}><FaHeart size={18} /> Liked Songs</NavLink>}
+          {user && <NavLink to="/upload" className={link}><FaUpload size={18} /> Upload Song</NavLink>}
         </nav>
       </div>
 
