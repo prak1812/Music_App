@@ -9,26 +9,48 @@ import { PLACEHOLDER } from '../../utils/helpers';
 export default function TrackCard({ song, onPlay, isPlaying }) {
   const { user }             = useSelector((s) => s.auth);
   const { items: playlists } = useSelector((s) => s.playlist);
-  const [liked,    setLiked]    = useState(song.likes?.includes(user?._id));
+
+  // Fix: likes array may contain objects OR strings, handle both
+  const isLiked = () => {
+    if (!user || !song.likes) return false;
+    return song.likes.some((l) =>
+      typeof l === 'object' ? l._id === user._id : l === user._id
+    );
+  };
+
+  const [liked,    setLiked]    = useState(isLiked());
   const [showMenu, setShowMenu] = useState(false);
 
   const handleLike = async (e) => {
     e.stopPropagation();
     if (!user) return toast.error('Log in to like songs');
-    const res = await toggleLike(song._id);
-    setLiked(res.data.liked);
+    try {
+      const res = await toggleLike(song._id);
+      setLiked(res.data.liked);
+      if (res.data.liked) {
+        toast.success('Added to Liked Songs');
+      } else {
+        toast('Removed from Liked Songs', { icon: '💔' });
+      }
+    } catch {
+      toast.error('Could not update like');
+    }
   };
 
   const handleDownload = async (e) => {
     e.stopPropagation();
     if (!user) return toast.error('Log in to download');
-    const res = await downloadSong(song._id);
-    const a   = document.createElement('a');
-    a.href     = res.data.downloadUrl;
-    a.download = `${song.title}.mp3`;
-    a.target   = '_blank';
-    a.click();
-    toast.success('Download started!');
+    try {
+      const res = await downloadSong(song._id);
+      const a   = document.createElement('a');
+      a.href     = res.data.downloadUrl;
+      a.download = `${song.title}.mp3`;
+      a.target   = '_blank';
+      a.click();
+      toast.success('Download started!');
+    } catch {
+      toast.error('Download failed');
+    }
   };
 
   const handleAddToPlaylist = async (e, playlistId) => {
@@ -53,7 +75,9 @@ export default function TrackCard({ song, onPlay, isPlaying }) {
           alt={song.title}
           className="w-full aspect-square object-cover rounded-md shadow-lg"
         />
-        <button className={`absolute bottom-2 right-2 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center shadow-xl transition-all duration-200 ${isPlaying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0'}`}>
+        <button className={`absolute bottom-2 right-2 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center shadow-xl transition-all duration-200 ${
+          isPlaying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0'
+        }`}>
           {isPlaying
             ? <FaPause size={14} className="text-black" />
             : <FaPlay  size={14} className="text-black ml-0.5" />
@@ -65,7 +89,10 @@ export default function TrackCard({ song, onPlay, isPlaying }) {
       <p className="text-xs text-[#b3b3b3] truncate mt-1">{song.artist}</p>
 
       <div className="flex items-center gap-3 mt-3" onClick={(e) => e.stopPropagation()}>
-        <button onClick={handleLike} className={liked ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}>
+        <button
+          onClick={handleLike}
+          className={`transition-all ${liked ? 'text-[#1DB954]' : 'text-[#b3b3b3] hover:text-white'}`}
+        >
           {liked ? <FaHeart size={13} /> : <FaRegHeart size={13} />}
         </button>
         <button onClick={handleDownload} className="text-[#b3b3b3] hover:text-white">

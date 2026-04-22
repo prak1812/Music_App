@@ -8,22 +8,29 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 export default function LikedSongs() {
   const dispatch = useDispatch();
+  const { user }                  = useSelector((s) => s.auth);
   const { currentSong, isPlaying } = useSelector((s) => s.player);
   const [songs,   setSongs]   = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
+    setLoading(true);
     getLikedSongs()
       .then((res) => {
-        // Handle both shapes: array directly OR { songs: [] }
         const data = res.data;
-        if (Array.isArray(data))        setSongs(data);
+        if (Array.isArray(data))             setSongs(data);
         else if (Array.isArray(data?.songs)) setSongs(data.songs);
-        else setSongs([]);
+        else                                 setSongs([]);
       })
       .catch(() => setSongs([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
+
+  // Remove song from local state when unliked
+  const handleUnlike = (songId) => {
+    setSongs((prev) => prev.filter((s) => s._id !== songId));
+  };
 
   const isActive = songs.some((s) => s._id === currentSong?._id) && isPlaying;
 
@@ -48,9 +55,10 @@ export default function LikedSongs() {
         {songs.length > 0 && (
           <div className="mb-6">
             <button
-              onClick={isActive
-                ? () => dispatch(togglePlay())
-                : () => dispatch(setCurrentSong({ song: songs[0], queue: songs, index: 0 }))
+              onClick={
+                isActive
+                  ? () => dispatch(togglePlay())
+                  : () => dispatch(setCurrentSong({ song: songs[0], queue: songs, index: 0 }))
               }
               className="w-14 h-14 bg-[#1DB954] rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
             >
@@ -63,7 +71,8 @@ export default function LikedSongs() {
         )}
 
         {songs.length === 0 ? (
-          <div className="text-center py-20"> 
+          <div className="text-center py-20">
+            <FaHeart size={48} className="text-[#b3b3b3] mx-auto mb-4" />
             <p className="text-white text-xl font-bold mb-2">Songs you like will appear here</p>
             <p className="text-[#b3b3b3] text-sm">Tap the heart icon on any song.</p>
           </div>
@@ -75,6 +84,7 @@ export default function LikedSongs() {
               index={i}
               onPlay={() => dispatch(setCurrentSong({ song, queue: songs, index: i }))}
               isPlaying={currentSong?._id === song._id && isPlaying}
+              onUnlike={handleUnlike}
             />
           ))
         )}

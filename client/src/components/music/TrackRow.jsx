@@ -7,20 +7,42 @@ import toast from 'react-hot-toast';
 
 export default function TrackRow({ song, index, onPlay, isPlaying, playlistId, isOwner, onRemove }) {
   const { user } = useSelector((s) => s.auth);
-  const [liked, setLiked] = useState(song.likes?.includes(user?._id));
+
+  // Fix: likes array may contain objects OR strings, handle both
+  const isLiked = () => {
+    if (!user || !song.likes) return false;
+    return song.likes.some((l) =>
+      typeof l === 'object' ? l._id === user._id : l === user._id
+    );
+  };
+
+  const [liked, setLiked] = useState(isLiked());
 
   const handleLike = async (e) => {
     e.stopPropagation();
     if (!user) return toast.error('Log in to like songs');
-    const res = await toggleLike(song._id);
-    setLiked(res.data.liked);
+    try {
+      const res = await toggleLike(song._id);
+      setLiked(res.data.liked);
+      if (res.data.liked) {
+        toast.success('Added to Liked Songs');
+      } else {
+        toast('Removed from Liked Songs', { icon: '💔' });
+      }
+    } catch {
+      toast.error('Could not update like');
+    }
   };
 
   const handleRemove = async (e) => {
     e.stopPropagation();
-    await removeSongFromPlaylist(playlistId, song._id);
-    onRemove(song._id);
-    toast.success('Removed from playlist');
+    try {
+      await removeSongFromPlaylist(playlistId, song._id);
+      onRemove(song._id);
+      toast.success('Removed from playlist');
+    } catch {
+      toast.error('Could not remove song');
+    }
   };
 
   return (
@@ -53,13 +75,20 @@ export default function TrackRow({ song, index, onPlay, isPlaying, playlistId, i
       <div className="flex items-center gap-4 shrink-0">
         <button
           onClick={handleLike}
-          className={`${liked ? 'text-[#1DB954]' : 'text-[#b3b3b3] opacity-0 group-hover:opacity-100 hover:text-white'} transition-all`}
+          className={`transition-all ${
+            liked
+              ? 'text-[#1DB954]'
+              : 'text-[#b3b3b3] opacity-0 group-hover:opacity-100 hover:text-white'
+          }`}
         >
           {liked ? <FaHeart size={13} /> : <FaRegHeart size={13} />}
         </button>
         <span className="text-sm text-[#b3b3b3] w-10 text-right">{formatTime(song.duration)}</span>
         {isOwner && (
-          <button onClick={handleRemove} className="text-[#b3b3b3] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all">
+          <button
+            onClick={handleRemove}
+            className="text-[#b3b3b3] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
+          >
             <FaTrash size={13} />
           </button>
         )}
