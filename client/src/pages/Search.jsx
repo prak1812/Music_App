@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaMusic } from 'react-icons/fa';
 import { searchSongs } from '../services/api';
 import { setCurrentSong } from '../redux/slices/playerSlice';
 import TrackCard from '../components/music/TrackCard';
@@ -26,8 +26,12 @@ export default function Search() {
     timer.current = setTimeout(async () => {
       setLoading(true);
       setSearched(true);
-      const res = await searchSongs(q);
-      setResults(res.data);
+      try {
+        const res = await searchSongs(q);
+        setResults(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setResults([]);
+      }
       setLoading(false);
     }, 400);
   };
@@ -77,22 +81,25 @@ export default function Search() {
 
       {!loading && searched && (
         <>
-          <p className="text-[#b3b3b3] text-sm mb-4">{results.length} results for "{query}"</p>
           {results.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {results.map((song, i) => (
-                <TrackCard
-                  key={song._id}
-                  song={song}
-                  onPlay={() => dispatch(setCurrentSong({ song, queue: results, index: i }))}
-                  isPlaying={currentSong?._id === song._id && isPlaying}
-                />
-              ))}
-            </div>
+            <>
+              <p className="text-[#b3b3b3] text-sm mb-4">{results.length} result{results.length !== 1 ? 's' : ''} for "{query}"</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {results.map((song, i) => (
+                  <TrackCard
+                    key={song._id}
+                    song={song}
+                    onPlay={() => dispatch(setCurrentSong({ song, queue: results, index: i }))}
+                    isPlaying={currentSong?._id === song._id && isPlaying}
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="text-center py-20">
-              <p className="text-white text-xl font-bold mb-2">No results found</p>
-              <p className="text-[#b3b3b3]">Try different keywords.</p>
+              <FaMusic size={56} className="text-[#535353] mx-auto mb-4" />
+              <p className="text-white text-xl font-bold mb-2">No results found for "{query}"</p>
+              <p className="text-[#b3b3b3] text-sm">Try searching for a different song, artist, or album.</p>
             </div>
           )}
         </>

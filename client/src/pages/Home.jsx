@@ -5,6 +5,7 @@ import { setCurrentSong } from '../redux/slices/playerSlice';
 import TrackCard from '../components/music/TrackCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { GENRES } from '../utils/helpers';
+import { FaMusic } from 'react-icons/fa';
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -19,7 +20,6 @@ export default function Home() {
     setLoading(true);
     getSongs({ genre: genre || undefined, page: 1, limit: 20 })
       .then((res) => {
-        // Guard against unexpected API response shapes
         const fetchedSongs = Array.isArray(res.data?.songs) ? res.data.songs
                            : Array.isArray(res.data)        ? res.data
                            : [];
@@ -84,7 +84,15 @@ export default function Home() {
         <LoadingSpinner />
       ) : songs.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-[#b3b3b3] text-lg">No songs found.</p>
+          <FaMusic size={56} className="text-[#535353] mx-auto mb-4" />
+          <p className="text-white text-xl font-bold mb-2">
+            {genre ? `No ${genre} songs yet` : 'No songs available yet'}
+          </p>
+          <p className="text-[#b3b3b3] text-sm">
+            {genre
+              ? 'Try a different genre or check back later.'
+              : 'Be the first to upload a song using the Upload Song button in the sidebar.'}
+          </p>
         </div>
       ) : (
         <>
