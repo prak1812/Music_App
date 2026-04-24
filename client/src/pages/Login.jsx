@@ -21,9 +21,7 @@ export default function Login() {
     if (!res.error) navigate('/');
   };
 
-  const fillDemo = () => {
-    setForm({ email: 'demo@test.com', password: 'password123' });
-  };
+  
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
@@ -38,20 +36,7 @@ export default function Login() {
           <h1 className="text-3xl font-black text-white">Log in to SoundStream</h1>
         </div>
 
-        {/* Demo Credentials Box */}
-        <div className="bg-[#1a3a2a] border border-[#1DB954]/40 rounded-xl px-5 py-4 mb-5">
-          <p className="text-[#1DB954] text-sm font-bold mb-2">🎵 Demo Account</p>
-          <div className="text-sm text-[#b3b3b3] space-y-1 mb-3">
-            <p>Email: <span className="text-white font-medium">demo@test.com</span></p>
-            <p>Password: <span className="text-white font-medium">password123</span></p>
-          </div>
-          <button
-            onClick={fillDemo}
-            className="w-full bg-[#1DB954] text-black py-2 rounded-full text-sm font-bold hover:bg-[#1ed760] transition-colors"
-          >
-            Click to fill demo credentials
-          </button>
-        </div>
+       
 
         <div className="rounded-2xl p-8 border border-[#282828]">
           {error && (
